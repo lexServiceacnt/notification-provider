@@ -11,12 +11,11 @@ namespace NotificationService.UnitTests.Controllers.V1.EmailController
     using Microsoft.Azure.Storage.Queue;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.Options;
-    using Microsoft.Rest.Azure;
     using Moq;
     using Newtonsoft.Json;
     using NotificationHandler.Controllers;
     using NotificationService.BusinessLibrary;
-    using NotificationService.BusinessLibrary.Business.v1;
+    using NotificationService.BusinessLibrary.Business.V1;
     using NotificationService.BusinessLibrary.Interfaces;
     using NotificationService.Common;
     using NotificationService.Common.Configurations;
@@ -67,7 +66,7 @@ namespace NotificationService.UnitTests.Controllers.V1.EmailController
             this.msGraphSettingOptions = new Mock<IOptions<MSGraphSetting>>();
             var config = new Dictionary<string, string>()
             {
-                { ConfigConstants.AllowedMaxResendDurationInDays, "1"},
+                { ConfigConstants.AllowedMaxResendDurationInDays, "1" },
                 { ConfigConstants.StorageAccountConfigSectionKey, JsonConvert.SerializeObject(new StorageAccountSetting() { NotificationQueueName = "test-queue", }) },
             };
 
@@ -88,12 +87,12 @@ namespace NotificationService.UnitTests.Controllers.V1.EmailController
             IList<NotificationResponse> responses = new List<NotificationResponse>();
 
             _ = this.emailHandlerManager
-                .Setup(emailHandlerManager => emailHandlerManager.ResendEmailNotifications(It.IsAny<string>(), It.IsAny<string[]>(), It.IsAny<bool>()))
+                .Setup(emailHandlerManager => emailHandlerManager.ResendNotifications(It.IsAny<string>(), It.IsAny<string[]>(), It.IsAny<NotificationType>(), It.IsAny<bool>()))
                 .Returns(Task.FromResult(responses));
 
             var result = emailController.ResendEmailNotifications(this.applicationName, this.notificationIds);
             Assert.AreEqual(result.Status.ToString(), "RanToCompletion");
-            this.emailHandlerManager.Verify(mgr => mgr.ResendEmailNotifications(It.IsAny<string>(), It.IsAny<string[]>(), It.IsAny<bool>()), Times.Once);
+            this.emailHandlerManager.Verify(mgr => mgr.ResendNotifications(It.IsAny<string>(), It.IsAny<string[]>(), It.IsAny<NotificationType>(), It.IsAny<bool>()), Times.Once);
             Assert.Pass();
         }
 
@@ -148,7 +147,8 @@ namespace NotificationService.UnitTests.Controllers.V1.EmailController
 
         private IList<EmailNotificationItemEntity> GetEmailNotificationItemEntities()
         {
-            IList<EmailNotificationItemEntity> list = new List<EmailNotificationItemEntity>() {
+            IList<EmailNotificationItemEntity> list = new List<EmailNotificationItemEntity>()
+            {
                 new EmailNotificationItemEntity()
                 {
                     NotificationId = Guid.NewGuid().ToString(),
